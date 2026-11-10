@@ -27,7 +27,7 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
     id: 2,
     speaker: 'ANNA',
     text: "No, thanks. I'll just look around.",
-    korean: '아니요, 고마워요. 그냥 좀 둘러볼게요.',
+    korean: '아니요, 괜찮아요. 그냥 좀 둘러볼게요.',
     stress: ['No', 'thanks', 'look', 'around'],
     start: 27.2,
     end: 30.5,
@@ -44,32 +44,23 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
   {
     id: 4,
     speaker: 'WILLIAM',
-    text: "That book's really not good --",
-    korean: '그 책은 정말 별로예요 --',
-    stress: ['book', 'really', 'not', 'good'],
+    text: "That book's really not good – just in case, you know, browsing turned to buying.",
+    korean: '그 책은 정말 별로예요 – 혹시라도 구경하시다가 사시게 될까 봐 드리는 말씀인데요.',
+    stress: ['book', 'really', 'not', 'good', 'browsing', 'buying'],
     start: 37.0,
-    end: 39.8,
+    end: 43.2,
   },
   {
     id: 5,
     speaker: 'WILLIAM',
-    text: 'just in case, you know, browsing turned to buying.',
-    korean: '혹시라도 구경하다가 사시게 될까 봐 드리는 말씀인데요.',
-    stress: ['case', 'browsing', 'buying'],
-    start: 40.0,
-    end: 43.5,
-  },
-  {
-    id: 6,
-    speaker: 'WILLIAM',
     text: "You'd be wasting your money.",
     korean: '돈 낭비하시는 걸 거예요.',
     stress: ['wasting', 'money'],
-    start: 43.8,
+    start: 43.5,
     end: 46.0,
   },
   {
-    id: 7,
+    id: 6,
     speaker: 'ANNA',
     text: 'Really?',
     korean: '정말요?',
@@ -78,16 +69,16 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
     end: 47.8,
   },
   {
-    id: 8,
+    id: 7,
     speaker: 'WILLIAM',
     text: 'Yes. This one though is... very good.',
     korean: '네. 하지만 이 책은... 아주 좋아요.',
-    stress: ['This', 'one', 'very', 'good'],
+    stress: ['This', 'one', 'though', 'very', 'good'],
     start: 48.0,
     end: 52.0,
   },
   {
-    id: 9,
+    id: 8,
     speaker: 'WILLIAM',
     text: 'I think the man who wrote it has actually been to Turkey, which helps.',
     korean: '이 책을 쓴 사람은 실제로 터키에 가본 것 같은데, 그게 도움이 되죠.',
@@ -96,7 +87,7 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
     end: 57.2,
   },
   {
-    id: 10,
+    id: 9,
     speaker: 'WILLIAM',
     text: "There's also a very amusing incident with a kebab.",
     korean: '케밥과 관련된 아주 재미있는 일화도 나오고요.',
@@ -105,7 +96,7 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
     end: 62.0,
   },
   {
-    id: 11,
+    id: 10,
     speaker: 'ANNA',
     text: "Thanks. I'll think about it.",
     korean: '고마워요. 생각해 볼게요.',
@@ -114,13 +105,31 @@ export const NOTTING_HILL_SCRIPT_SENTENCES: Sentence[] = [
     end: 65.5,
   },
   {
-    id: 12,
+    id: 11,
     speaker: 'WILLIAM',
     text: 'If you could just give me a second',
     korean: '잠시만 실례해도 될까요',
-    stress: ['give', 'second'],
+    stress: ['just', 'give', 'second'],
     start: 65.8,
-    end: 69.2,
+    end: 69.5,
+  },
+  {
+    id: 12,
+    speaker: 'WILLIAM',
+    text: 'Excuse me.',
+    korean: '실례합니다.',
+    stress: ['Excuse', 'me'],
+    start: 70.0,
+    end: 72.3,
+  },
+  {
+    id: 13,
+    speaker: 'THIEF',
+    text: 'Yes.',
+    korean: '네.',
+    stress: ['Yes'],
+    start: 72.5,
+    end: 74.5,
   },
 ];
 
@@ -161,18 +170,17 @@ export const STEP_INFOS: StepInfo[] = [
   },
 ];
 
-const STORAGE_KEY_SENTENCES = 'scene_shadow_notting_hill_screenplay_v2';
-const STORAGE_KEY_PROGRESS = 'scene_shadow_notting_hill_progress_v2';
+const STORAGE_KEY_SENTENCES = 'scene_shadow_notting_hill_screenplay_v4';
+const STORAGE_KEY_PROGRESS = 'scene_shadow_notting_hill_progress_v4';
 
 export function loadStoredSentences(): Sentence[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_SENTENCES);
     if (!raw) {
-      // By default, initialize with the screenplay dialogue lines
       return NOTTING_HILL_SCRIPT_SENTENCES;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed) && parsed.length >= 13) {
       return parsed;
     }
     return NOTTING_HILL_SCRIPT_SENTENCES;

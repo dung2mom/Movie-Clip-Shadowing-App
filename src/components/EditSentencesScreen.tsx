@@ -257,7 +257,7 @@ export const EditSentencesScreen: React.FC<EditSentencesScreenProps> = ({
   const handleLoadSamples = () => {
     if (
       sentences.length === 0 ||
-      window.confirm('기존 문장을 대체하고 영화 원본 대본 12문장 대사를 불러오시겠습니까?')
+      window.confirm('기존 문장을 대체하고 영화 원본 대본 13문장 대사를 불러오시겠습니까?')
     ) {
       onUpdateSentences(SAMPLE_NOTTING_HILL_SENTENCES);
       resetForm();
@@ -335,7 +335,7 @@ export const EditSentencesScreen: React.FC<EditSentencesScreenProps> = ({
               Speaker / 화자
             </label>
             <div className="flex items-center gap-2">
-              {['William', 'Anna'].map((spk) => (
+              {['William', 'Anna', 'Thief'].map((spk) => (
                 <button
                   type="button"
                   key={spk}
@@ -508,7 +508,7 @@ export const EditSentencesScreen: React.FC<EditSentencesScreenProps> = ({
       <div className="flex items-center justify-between p-3 bg-amber-50/70 rounded-xl border border-amber-200/80">
         <div>
           <span className="text-xs font-bold text-amber-950">Notting Hill Screenplay Preset</span>
-          <p className="text-[11px] text-amber-800">영화 원본 대본 12문장 대사 세트</p>
+          <p className="text-[11px] text-amber-800">영화 원본 대본 13문장 대사 세트</p>
         </div>
         <button
           onClick={handleLoadSamples}

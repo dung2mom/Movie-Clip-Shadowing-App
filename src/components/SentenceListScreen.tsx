@@ -172,6 +172,8 @@ export const SentenceListScreen: React.FC<SentenceListScreenProps> = ({
                         className={`text-[10px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded ${
                           sentence.speaker.toUpperCase() === 'ANNA'
                             ? 'bg-amber-50 text-amber-900 border border-amber-200/60'
+                            : sentence.speaker.toUpperCase() === 'THIEF'
+                            ? 'bg-purple-50 text-purple-900 border border-purple-200/60'
                             : 'bg-emerald-50 text-emerald-900 border border-emerald-200/60'
                         }`}
                       >

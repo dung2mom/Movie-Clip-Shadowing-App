@@ -25,7 +25,10 @@ interface ShadowingScreenProps {
   totalSentences: number;
   progress: SentenceProgress;
   playerRef: React.RefObject<YouTubePlayerHandle | null>;
-  onUpdateProgress: (updated: SentenceProgress) => void;
+  onUpdateProgress: (
+    updated: SentenceProgress,
+    activityType?: 'listen' | 'shadowing' | 'self_check' | 'complete'
+  ) => void;
   onNext: () => void;
   onPrev: () => void;
   onGoToList: () => void;
@@ -110,12 +113,53 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
     };
   }, []);
 
-  // Adjust step selection
+  // Adjust step selection & auto-play for Step 1 (듣기) and Step 3 (쉐도우)
   const handleStepSelect = (step: StepType) => {
     setActiveStep(step);
     const stepInfo = STEP_INFOS.find((s) => s.step === step);
     if (stepInfo) {
       setIsTextHidden(stepInfo.defaultTextHidden);
+    }
+
+    // Stop recording if active
+    if (isRecording) {
+      if (recordTimerRef.current) {
+        window.clearInterval(recordTimerRef.current);
+        recordTimerRef.current = null;
+      }
+      stopRecording();
+      setRecordSeconds(0);
+    }
+
+    // Step 1 (듣기) or Step 3 (쉐도우): automatically start playback!
+    if (step === 1 || step === 3) {
+      stopVoice();
+
+      if (playerRef.current) {
+        playerRef.current.stopSegment();
+        setIsPlayingClip(true);
+        playerRef.current.setPlaybackRate(playbackRate);
+        playerRef.current.playSegment(sentence.start, sentence.end, loopEnabled, () => {
+          if (!loopEnabled) {
+            setIsPlayingClip(false);
+          }
+        });
+
+        // Increment play count
+        onUpdateProgress(
+          {
+            ...progress,
+            plays: (progress.plays || 0) + 1,
+          },
+          'listen'
+        );
+      }
+    } else {
+      // Step 2 (읽기) or Step 4 (확인): pause/stop video so learner can read / record
+      if (playerRef.current && isPlayingClip) {
+        playerRef.current.stopSegment();
+        setIsPlayingClip(false);
+      }
     }
   };
 
@@ -141,10 +185,13 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
     });
 
     // Increment play count
-    onUpdateProgress({
-      ...progress,
-      plays: (progress.plays || 0) + 1,
-    });
+    onUpdateProgress(
+      {
+        ...progress,
+        plays: (progress.plays || 0) + 1,
+      },
+      'listen'
+    );
   }, [sentence.start, sentence.end, loopEnabled, playbackRate, isPlayingClip, progress, onUpdateProgress, playerRef, stopVoice]);
 
   // Toggle loop and notify player immediately
@@ -177,11 +224,14 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
 
       // Mark status: "practiced" after 1 recording, "done" if recorded in Step 4 (확인)
       const newStatus = activeStep === 4 ? 'done' : progress.status === 'done' ? 'done' : 'practiced';
-      onUpdateProgress({
-        ...progress,
-        recordings: (progress.recordings || 0) + 1,
-        status: newStatus,
-      });
+      onUpdateProgress(
+        {
+          ...progress,
+          recordings: (progress.recordings || 0) + 1,
+          status: newStatus,
+        },
+        'shadowing'
+      );
       return;
     }
 
@@ -207,10 +257,13 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
     const currentCheck = [...progress.selfCheck] as [SelfCheckValue, SelfCheckValue, SelfCheckValue];
     currentCheck[questionIndex] = rating;
 
-    onUpdateProgress({
-      ...progress,
-      selfCheck: currentCheck,
-    });
+    onUpdateProgress(
+      {
+        ...progress,
+        selfCheck: currentCheck,
+      },
+      'self_check'
+    );
   };
 
   // Web Speech API Word Check
@@ -347,6 +400,8 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
             className={`font-bold tracking-wide uppercase px-2 py-0.5 rounded-md text-[11px] border ${
               sentence.speaker.toUpperCase() === 'ANNA'
                 ? 'bg-amber-50 text-amber-900 border-amber-200/80'
+                : sentence.speaker.toUpperCase() === 'THIEF'
+                ? 'bg-purple-50 text-purple-900 border-purple-200/80'
                 : 'bg-emerald-50 text-emerald-900 border-emerald-200/80'
             }`}
           >
@@ -472,11 +527,11 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
                 <span className="text-xs">{`Step ${info.step}`}</span>
                 <span className="text-[11px] opacity-95 truncate max-w-full font-semibold mt-0.5">
                   {info.step === 1
-                    ? '듣기'
+                    ? '듣기 ▶'
                     : info.step === 2
                     ? '읽기'
                     : info.step === 3
-                    ? '쉐도우'
+                    ? '쉐도우 ▶'
                     : '확인'}
                 </span>
               </button>
@@ -490,11 +545,18 @@ export const ShadowingScreen: React.FC<ShadowingScreenProps> = ({
           if (!current) return null;
           return (
             <div className="bg-stone-50 rounded-xl p-2.5 text-xs text-stone-700 flex flex-col gap-0.5 border border-stone-200/60">
-              <div className="font-semibold text-stone-900 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
-                <span>
-                  {current.titleKo} ({current.titleEn})
-                </span>
+              <div className="font-semibold text-stone-900 flex items-center justify-between gap-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
+                  <span>
+                    {current.titleKo} ({current.titleEn})
+                  </span>
+                </div>
+                {(current.step === 1 || current.step === 3) && (
+                  <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100/80 border border-emerald-200 px-1.5 py-0.5 rounded">
+                    클릭 시 자동 재생
+                  </span>
+                )}
               </div>
               <p className="text-stone-600 pl-3.5 text-[11px] leading-relaxed">
                 {current.descKo}
